@@ -1,0 +1,1 @@
+// Fetch all wallet transactions of the a specific user with pagenation

@@ -4,22 +4,22 @@ frameworkVersion: '3'
 plugins:
   - serverless-deployment-bucket
   - serverless-iam-roles-per-function
-  - serverless-domain-manager
-  - serverless-associate-waf
+  # - serverless-domain-manager
+  # - serverless-associate-waf
 
 custom:
   project: spark
   projectKey: SPK
   region: ap-south-1
-  domain:
-    dev: dev.withspark.club
-    test: test.withspark.club
-    prod: api.withspark.club
-  customDomain:
-    domainName: ${self:custom.domain.${opt:stage}}
-    basePath: 'kyc'
-    stage: ${opt:stage}
-    createRoute53Record: false
+  # domain:
+  #   dev: dev.withspark.club
+  #   test: test.withspark.club
+  #   prod: api.withspark.club
+  # customDomain:
+  #   domainName: ${self:custom.domain.${opt:stage}}
+  #   basePath: 'kyc'
+  #   stage: ${opt:stage}
+  #   createRoute53Record: false
   associateWaf:
     name: spark-resources-ACL
     version: V2  
@@ -43,76 +43,89 @@ provider:
   architecture: arm64
   environment:
     REGION: ${self:custom.region}
-    ADDRESSES_TABLE: Addresses
 
 resources:
   Resources:
-    AddressesTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        TableName: Addresses
-        AttributeDefinitions:
-          - AttributeName: userId
-            AttributeType: S
-          - AttributeName: addressId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: userId
-            KeyType: HASH
-          - AttributeName: addressId
-            KeyType: RANGE
-        BillingMode: PAY_PER_REQUEST
-        TableClass: STANDARD
-        PointInTimeRecoverySpecification:
-          PointInTimeRecoveryEnabled: true
-
     ApiGatewayRestApi:
       Type: AWS::ApiGateway::RestApi
       Properties:
         Name: ${self:service}
         Description: Create and Get wallet and coin transactions.
 
-    UserPoolAuthorizer:
-      Type: AWS::ApiGateway::Authorizer
-      Properties:
-        Name: jwt-authorizer-spark
-        Type: COGNITO_USER_POOLS
-        ProviderARNs:
-          - !ImportValue UserPoolArn
-        # The lenght of time(in seconds) that the authorizer results should be cached
-        AuthorizerResultTtlInSeconds: 180
-        RestApiId: 
-          Ref: ApiGatewayRestApi
-        IdentitySource: method.request.header.Authorization
+    # UserPoolAuthorizer:
+    #   Type: AWS::ApiGateway::Authorizer
+    #   Properties:
+    #     Name: jwt-authorizer-spark
+    #     Type: COGNITO_USER_POOLS
+    #     ProviderARNs:
+    #       - !ImportValue UserPoolArn
+    #     # The lenght of time(in seconds) that the authorizer results should be cached
+    #     AuthorizerResultTtlInSeconds: 180
+    #     RestApiId: 
+    #       Ref: ApiGatewayRestApi
+    #     IdentitySource: method.request.header.Authorization
 
 functions:
-  create-address:
-    handler: functions/create-address.createAddress
-    name: ${self:service}-create-address
-    description: Create a new address for user.
+  create-wallet-transaction:
+    handler: functions/wallet/create-wallet-transaction.createWalletTransaction
+    name: ${self:service}-wallet-transaction
+    description: Wallet transaction created in wallet Table.
     timeout: 30 #seconds
     memorySize: 128 #mb
     events:
       - http:
-          path: '/'
+          path: 'wallet'
           method: POST
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: UserPoolAuthorizer          
-    iamRoleStatementsName: ${self:service}-createAddress-lambda-role
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer          
+    iamRoleStatementsName: ${self:service}-walletTransaction-lambda-role
     iamRoleStatements:
       - Effect: 'Allow'
         Action:
-          - 'dynamodb:PutItem'
-        Resource: !GetAtt AddressesTable.Arn
+          - dynamodb:PutItem
+        Resource: !ImportValue WalletTransactionArn
+    environment:
+      WALLET_TRANSACTION_TABLE: WalletTransaction
     package:
       individually: true
       patterns:
         - '!functions/**'
         - '!node_modules'
-        - '!node_modules/@aws-sdk' # Don't need to bundle "@asw-sdk" as Node.js 18 Lambda runtime include SDK v3
-        - 'functions/create-address.mjs'
+        - '!node_modules/@aws-sdk' 
+        - 'functions/wallet/create-wallet-transaction.mjs'
+
+  get-wallet-transaction:
+    handler: functions/wallet/get-wallet-transactions.getWalletTransactions
+    name: ${self:service}-userall-wallet-transaction
+    description: user all Wallet transaction in wallet Table.
+    timeout: 30 #seconds
+    memorySize: 128 #mb
+    events:
+      - http:
+          path: 'userwallettransaction/{userId}'
+          method: POST
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer          
+    iamRoleStatementsName: ${self:service}-userwalletTransaction-lambda-role
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - dynamodb:Query
+        Resource: !ImportValue WalletTransactionArn
+    environment:
+      WALLET_TRANSACTION_TABLE: WalletTransaction
+    package:
+      individually: true
+      patterns:
+        - '!functions/**'
+        - '!node_modules'
+        - '!node_modules/@aws-sdk' 
+        - 'functions/wallet/get-wallet-transactions.mjs'
+
 package:
   individually: true
   patterns:

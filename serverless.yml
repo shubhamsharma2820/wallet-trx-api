@@ -126,6 +126,187 @@ functions:
         - '!node_modules/@aws-sdk' 
         - 'functions/wallet/get-wallet-transactions.mjs'
 
+  get-bor-transaction:
+    handler: functions/wallet/get-bor-transaction.getBorBaesdWalletTransaction
+    name: ${self:service}-user-all-bor-wallet-transaction
+    description: user all bor based Wallet transaction in wallet Table.
+    timeout: 30 #seconds
+    memorySize: 128 #mb
+    events:
+      - http:
+          path: 'borwallettransaction/{userId}'   #bor = based on referenceId
+          method: POST
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer          
+    iamRoleStatementsName: ${self:service}-userBORwalletTransaction-lambda-role
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - dynamodb:Query
+        Resource: !ImportValue WalletTransactionArn
+    environment:
+      WALLET_TRANSACTION_TABLE: WalletTransaction
+    package:
+      individually: true
+      patterns:
+        - '!functions/**'
+        - '!node_modules'
+        - '!node_modules/@aws-sdk' 
+        - 'functions/wallet/get-bor-transaction.mjs'
+
+  get-all-walletbor-transaction:
+    handler: functions/wallet/get-reference-based-transaction.getBorBaesdAllWalletTransaction
+    name: ${self:service}-all-bor-based-wallet-transaction
+    description: all bor based Wallet transaction in wallet Table.
+    timeout: 30 #seconds
+    memorySize: 128 #mb
+    events:
+      - http:
+          path: 'allborwallettransaction'   #bor = based on referenceId
+          method: POST
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer          
+    iamRoleStatementsName: ${self:service}-allBORwalletTransaction-lambda-role
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - dynamodb:Scan
+        Resource: !ImportValue WalletTransactionArn
+    environment:
+      WALLET_TRANSACTION_TABLE: WalletTransaction
+    package:
+      individually: true
+      patterns:
+        - '!functions/**'
+        - '!node_modules'
+        - '!node_modules/@aws-sdk' 
+        - 'functions/wallet/get-reference-based-transaction.mjs'
+
+  create-coin-transaction:
+    handler: functions/coin/create-coin-transaction.createCoinTransaction
+    name: ${self:service}-coin-transaction
+    description: coin transaction created in coin Table.
+    timeout: 30 #seconds
+    memorySize: 128 #mb
+    events:
+      - http:
+          path: 'coin'
+          method: POST
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer          
+    iamRoleStatementsName: ${self:service}-coinTransaction-lambda-role
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - dynamodb:PutItem
+        Resource: !ImportValue CoinTransactionTableArn
+    environment:
+      COIN_TRANSACTION_TABLE: CoinTransaction
+    package:
+      individually: true
+      patterns:
+        - '!functions/**'
+        - '!node_modules'
+        - '!node_modules/@aws-sdk' 
+        - 'functions/coin/create-coin-transaction.mjs'
+
+  get-coin-transaction:
+    handler: functions/coin/get-coin-transactions.getCoinTransactions
+    name: ${self:service}-user-all-coin-transaction
+    description: user all coin transaction in coin Table.
+    timeout: 30 #seconds
+    memorySize: 128 #mb
+    events:
+      - http:
+          path: 'usercointransaction/{userId}'
+          method: POST
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer          
+    iamRoleStatementsName: ${self:service}-usercoinTransaction-lambda-role
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - dynamodb:Query
+        Resource: !ImportValue CoinTransactionTableArn
+    environment:
+      COIN_TRANSACTION_TABLE: CoinTransaction
+    package:
+      individually: true
+      patterns:
+        - '!functions/**'
+        - '!node_modules'
+        - '!node_modules/@aws-sdk' 
+        - 'functions/coin/get-coin-transactions.mjs'
+
+  get-bor-coin-transaction:
+    handler: functions/coin/get-bor-coin-transaction.getBorBaesdcoinTransaction
+    name: ${self:service}-user-all-bor-coin-transaction
+    description: user all bor based coin transaction in coin Table.
+    timeout: 30 #seconds
+    memorySize: 128 #mb
+    events:
+      - http:
+          path: 'borcointransaction/{userId}'   #bor = based on referenceId
+          method: POST
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer          
+    iamRoleStatementsName: ${self:service}-userBORcoinTransaction-lambda-role
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - dynamodb:Query
+        Resource: !ImportValue CoinTransactionTableArn
+    environment:
+      COIN_TRANSACTION_TABLE: CoinTransaction
+    package:
+      individually: true
+      patterns:
+        - '!functions/**'
+        - '!node_modules'
+        - '!node_modules/@aws-sdk' 
+        - 'functions/coin/get-bor-coin-transaction.mjs'
+
+  get-all-cointbor-transaction:
+    handler: functions/coin/get-referenceId-based-coin-transaction.getBorBaesdAllCoinTransaction
+    name: ${self:service}-all-bor-based-coin-transaction
+    description: all bor based Coin transaction in coin Table.
+    timeout: 30 #seconds
+    memorySize: 128 #mb
+    events:
+      - http:
+          path: 'allbor-coin-transaction'   #bor = based on referenceId
+          method: POST
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer          
+    iamRoleStatementsName: ${self:service}-allBORcoinTransaction-lambda-role
+    iamRoleStatements:
+      - Effect: 'Allow'
+        Action:
+          - dynamodb:Scan
+        Resource: !ImportValue CoinTransactionTableArn
+    environment:
+      COIN_TRANSACTION_TABLE: CoinTransaction
+    package:
+      individually: true
+      patterns:
+        - '!functions/**'
+        - '!node_modules'
+        - '!node_modules/@aws-sdk' 
+        - 'functions/coin/get-referenceId-based-coin-transaction.mjs'
+
+
 package:
   individually: true
   patterns:

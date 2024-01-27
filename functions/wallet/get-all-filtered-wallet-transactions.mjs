@@ -1,40 +1,45 @@
-import { QueryCommand } from "@aws-sdk/lib-dynamodb";
+/**
+ * This function used by admin to retrive all the wallet transaction based on 
+ * the referenceId or transaction type. Eg: gold, bid, cashback etc...
+ */
+
+import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 
-const coinTable = process.env.COIN_TRANSACTION_TABLE;
+const walletTable = process.env.WALLET_TRANSACTION_TABLE;
 const limit = 30;
 
-export const getUserFilteredCoinTransactions = async (event) => {
+export const getAllFilteredWalletTransactions = async (event) => {
   console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
   const response = { statusCode: 200, body: "" };
+
   try {
-    const { exclusiveStartKey, sortKeyPrefix } = JSON.parse(event.body);
+    const { exclusiveStartKey , sortKeyPrefix } = JSON.parse(event.body);
     let ExclusiveStartKey;
     if (exclusiveStartKey) {
       ExclusiveStartKey = exclusiveStartKey || null;
     }
-    const userId = event.pathParameters.userId;
+
     //DynamoDB query parameters
     const params = {
-      TableName: coinTable,
+      TableName: walletTable,
       Limit: limit,
       ExclusiveStartKey: ExclusiveStartKey,
-      KeyConditionExpression:
-        "userId = :userId AND begins_with(referenceId, :referenceId)",
+      FilterExpression: "begins_with(referenceId, :referenceId)",
       ExpressionAttributeValues: {
-        ":userId": userId,
         ":referenceId": sortKeyPrefix,
       },
     };
 
     const { Items, LastEvaluatedKey } = await ddbDocClient.send(
-      new QueryCommand(params)
+      new ScanCommand(params)
     );
+
     response.body = JSON.stringify({
       status: 200,
       data: Items,
       message:
-        "User's all filtere based coin transactions retrieved successfully!. ",
+        "All referenceId-based wallet transactions retrieved successfully!.",
       lastEvaluatedKey: LastEvaluatedKey || null,
     });
   } catch (error) {
@@ -43,9 +48,9 @@ export const getUserFilteredCoinTransactions = async (event) => {
     response.body = JSON.stringify({
       status: 500,
       error: "Internal Server Error",
-      message:
-        "The server encountered an unexpected error. Please try again later.",
+      message: "The server encountered an unexpected error. Please try again later.",
     });
   }
+
   return response;
 };

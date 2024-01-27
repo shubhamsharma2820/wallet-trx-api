@@ -106,9 +106,9 @@ functions:
         - "functions/wallet/create-wallet-transaction.mjs"
         - "schemas/wallet/create-wallet-transaction-schema.json"
 
-  get-wallet-transaction:
+  get-wallet-transactions:
     handler: functions/wallet/get-wallet-transactions.getWalletTransactions
-    name: ${self:service}-user-all-wallet-transaction
+    name: ${self:service}-user-all-wallet-transactions
     description: Get all wallet transaction of the user.
     timeout: 30 #seconds
     memorySize: 128 #mb
@@ -119,7 +119,7 @@ functions:
           request:
             schemas:
               application/json:
-                schema: ${file(./schemas/wallet/get-wallet-transaction-schema.json)}
+                schema: ${file(./schemas/wallet/get-wallet-transactions-schema.json)}
                 name: getuserwalletTransactionschema
                 description: "Validate schema to get all wallet transaction"
           # authorizer:
@@ -141,7 +141,7 @@ functions:
         - "!node_modules"
         - "!node_modules/@aws-sdk"
         - "functions/wallet/get-wallet-transactions.mjs"
-        - "schemas/wallet/get-wallet-transaction-schema.json"
+        - "schemas/wallet/get-wallet-transactions-schema.json"
 
   get-user-filtered-wallet-transactions:
     handler: functions/wallet/get-user-filtered-wallet-transactions.getUserFilteredWalletTransactions
@@ -156,7 +156,7 @@ functions:
           request:
             schemas:
               application/json:
-                schema: ${file(./schemas/wallet/get-user-filtered-wallet-schema.json)}
+                schema: ${file(./schemas/wallet/get-user-filtered-wallet-transactions-schema.json)}
                 name: getUserFilteredWalletTransactionsschema
                 description: "Validate schema to get user filtered wallet transaction"
           # authorizer:
@@ -178,11 +178,11 @@ functions:
         - "!node_modules"
         - "!node_modules/@aws-sdk"
         - "functions/wallet/get-user-filtered-wallet-transactions.mjs"
-        - "schemas/wallet/get-user-filtered-wallet-schema.json"
+        - "schemas/wallet/get-user-filtered-wallet-transactions-schema.json"
 
-  get-all-filtered-wallet-transaction:
-    handler: functions/wallet/get-all-filtered-wallet-transaction.getAllFilteredWalletTransactions
-    name: ${self:service}-get-all-filtered-wallet-transaction
+  get-all-filtered-wallet-transactions:
+    handler: functions/wallet/get-all-filtered-wallet-transactions.getAllFilteredWalletTransactions
+    name: ${self:service}-get-all-filtered-wallet-transactions
     description: Get all wallet transactions based on reference type like gold, cashback etc…
     timeout: 30 #seconds
     memorySize: 128 #mb
@@ -193,7 +193,7 @@ functions:
           request:
             schemas:
               application/json:
-                schema: ${file(./schemas/wallet/get-all-filtered-wallet-transaction-schema.json)}
+                schema: ${file(./schemas/wallet/get-all-filtered-wallet-transactions-schema.json)}
                 name: getAllFilteredWalletTransactionsschemas
                 description: "Validate schema to get all filtered wallet transaction"
           # authorizer:
@@ -214,8 +214,8 @@ functions:
         - "!functions/**"
         - "!node_modules"
         - "!node_modules/@aws-sdk"
-        - "functions/wallet/get-all-filtered-wallet-transaction.mjs"
-        - "schemas/wallet/get-all-filtered-wallet-transaction-schema.json"
+        - "functions/wallet/get-all-filtered-wallet-transactions.mjs"
+        - "schemas/wallet/get-all-filtered-wallet-transactions-schema.json"
 
   create-coin-transaction:
     handler: functions/coin/create-coin-transaction.createCoinTransaction
@@ -267,7 +267,7 @@ functions:
           request:
             schemas:
               application/json:
-                schema: ${file(./schemas/coin/get-coin-transaction-schema.json)}
+                schema: ${file(./schemas/coin/get-coin-transactions-schema.json)}
                 name: getUserCoinTransactionSchema
                 description: "Validate schema for creating wallet transaction"
           # authorizer:
@@ -289,11 +289,11 @@ functions:
         - "!node_modules"
         - "!node_modules/@aws-sdk"
         - "functions/coin/get-coin-transactions.mjs"
-        - 'schemas/coin/get-coin-transaction-schema.json'
+        - 'schemas/coin/get-coin-transactions-schema.json'
 
-  get-user-filtered-coin-transaction:
-    handler: functions/coin/get-user-filtered-coin-transaction.getUserFilteredCoinTransactions
-    name: ${self:service}-get-user-filtered-coin-transaction
+  get-user-filtered-coin-transactions:
+    handler: functions/coin/get-user-filtered-coin-transactions.getUserFilteredCoinTransactions
+    name: ${self:service}-get-user-filtered-coin-transactions
     description: Get user coin transactions base on reference like gold, cashback etc….
     timeout: 30 #seconds
     memorySize: 128 #mb
@@ -304,7 +304,7 @@ functions:
           request:
             schemas:
               application/json:
-                schema: ${file(./schemas/coin/get-user-filtered-coin-schema.json)}
+                schema: ${file(./schemas/coin/get-user-filtered-coin-transactions-schema.json)}
                 name: getUserFilteredCoinTransactionsSchema
                 description: "Validate schema to get user filtered coin transaction."
           # authorizer:
@@ -325,12 +325,12 @@ functions:
         - "!functions/**"
         - "!node_modules"
         - "!node_modules/@aws-sdk"
-        - "functions/coin/get-user-filtered-coin-transaction.mjs"
-        - 'schemas/coin/get-user-filtered-coin-schema.json'
+        - "functions/coin/get-user-filtered-coin-transactions.mjs"
+        - 'schemas/coin/get-user-filtered-coin-transactions-schema.json'
 
-  get-all-filtered-coin-transaction:
-    handler: functions/coin/get-all-filtered-coin-transaction.getAllFilteredCoinTransactions
-    name: ${self:service}-get-all-filtered-coin-transaction
+  get-all-filtered-coin-transactions:
+    handler: functions/coin/get-all-filtered-coin-transactions.getAllFilteredCoinTransactions
+    name: ${self:service}-get-all-filtered-coin-transactions
     description: Get all coin transactions based on reference type like gold, cashback etc….
     timeout: 30 #seconds
     memorySize: 128 #mb
@@ -341,7 +341,7 @@ functions:
           request:
             schemas:
               application/json:
-                schema: ${file(./schemas/coin/get-user-filtered-coin-transaction-schema.json)}
+                schema: ${file(./schemas/coin/get-all-filtered-coin-transactions-schema.json)}
                 name: getAllFilteredCoinTransactionsSchema
                 description: "Validate schema to get all filtered coin transaction."
           # authorizer:
@@ -362,8 +362,8 @@ functions:
         - "!functions/**"
         - "!node_modules"
         - "!node_modules/@aws-sdk"
-        - "functions/coin/get-all-filtered-coin-transaction.mjs"
-        - 'schemas/coin/get-user-filtered-coin-transaction-schema.json'
+        - "functions/coin/get-all-filtered-coin-transactions.mjs"
+        - 'schemas/coin/get-all-filtered-coin-transactions-schema.json'
 
 package:
   individually: true

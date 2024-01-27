@@ -1,4 +1,5 @@
-// Fetch all wallet transactions of a specific user with pagination
+// This funciton fetch wallet transactions of a specific user with pagination limit set to 30
+
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 
@@ -28,24 +29,23 @@ export const getWalletTransactions = async (event) => {
       },
     };
 
-    const { Items, LastEvaluatedKey } = await ddbDocClient.send(
-      new QueryCommand(params)
-    );
+    const { Items, LastEvaluatedKey } = await ddbDocClient.send( new QueryCommand(params));
     response.body = JSON.stringify({
       status: 200,
       data: Items,
       message: "Wallet transactions retrieved successfully!.",
-      lastEvaluatedKey: LastEvaluatedKey || null ,
+      lastEvaluatedKey: LastEvaluatedKey || null,
     });
-  } catch (error) {
+  } 
+  catch (error) {
     console.error("Error:", error);
     response.statusCode = 500;
     response.body = JSON.stringify({
       status: 500,
       error: "Internal Server Error",
-      message:
-        "The server encountered an unexpected error. Please try again later.",
+      message: "The server encountered an unexpected error. Please try again later.",
     });
   }
+
   return response;
 };

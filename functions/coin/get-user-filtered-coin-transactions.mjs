@@ -1,4 +1,7 @@
-// This funciton fetch coin transactions of a specific user with pagination limit set to 30
+/**
+ * This function will retrive all the coin transaction of a specific usre based on 
+ * the referenceId or transaction type. Eg: gold, bid, cashback etc...
+ */
 
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
@@ -6,12 +9,11 @@ import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 const coinTable = process.env.COIN_TRANSACTION_TABLE;
 const limit = 30;
 
-export const getCoinTransactions = async (event) => {
+export const getUserFilteredCoinTransactions = async (event) => {
     console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
     const response = { statusCode: 200, body: "" };
-
     try {
-        const { exclusiveStartKey } = JSON.parse(event.body);
+        const { exclusiveStartKey, sortKeyPrefix } = JSON.parse(event.body);
         let ExclusiveStartKey;
         if (exclusiveStartKey) {
             ExclusiveStartKey = exclusiveStartKey || null;
@@ -23,9 +25,10 @@ export const getCoinTransactions = async (event) => {
             TableName: coinTable,
             Limit: limit,
             ExclusiveStartKey: ExclusiveStartKey,
-            KeyConditionExpression: "userId = :userId",
+            KeyConditionExpression: "userId = :userId AND begins_with(referenceId, :referenceId)",
             ExpressionAttributeValues: {
                 ":userId": userId,
+                ":referenceId": sortKeyPrefix,
             },
         };
 
@@ -33,7 +36,7 @@ export const getCoinTransactions = async (event) => {
         response.body = JSON.stringify({
             status: 200,
             data: Items,
-            message: "Coin transactions retrieved successfully!.",
+            message: "User's all filtere based coin transactions retrieved successfully!. ",
             lastEvaluatedKey: LastEvaluatedKey || null,
         });
     }

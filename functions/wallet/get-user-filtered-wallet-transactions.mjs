@@ -1,3 +1,8 @@
+/**
+ * This function will retrive all the wallet transaction of a specific usre based on 
+ * the referenceId or transaction type. Eg: gold, bid, cashback etc...
+ */
+
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 
@@ -7,8 +12,9 @@ const limit = 30;
 export const getUserFilteredWalletTransactions = async (event) => {
   console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
   const response = { statusCode: 200, body: "" };
+
   try {
-    const { exclusiveStartKey = null, sortKeyPrefix } = JSON.parse(event.body);
+    const { exclusiveStartKey, sortKeyPrefix } = JSON.parse(event.body);
     let ExclusiveStartKey;
     if (exclusiveStartKey) {
       ExclusiveStartKey = exclusiveStartKey || null;
@@ -20,8 +26,7 @@ export const getUserFilteredWalletTransactions = async (event) => {
       TableName: walletTable,
       Limit: limit,
       ExclusiveStartKey: ExclusiveStartKey,
-      KeyConditionExpression:
-        "userId = :userId AND begins_with(referenceId, :referenceId)",
+      KeyConditionExpression: "userId = :userId AND begins_with(referenceId, :referenceId)",
       ExpressionAttributeValues: {
         ":userId": userId,
         ":referenceId": sortKeyPrefix,
@@ -35,8 +40,7 @@ export const getUserFilteredWalletTransactions = async (event) => {
     response.body = JSON.stringify({
       status: 200,
       data: Items,
-      message:
-        "Wallet transactions retrieved successfully based on user filtered..!!!",
+      message: "Wallet transactions retrieved successfully!",
       lastEvaluatedKey: LastEvaluatedKey || null,
     });
   } catch (error) {
@@ -45,9 +49,9 @@ export const getUserFilteredWalletTransactions = async (event) => {
     response.body = JSON.stringify({
       status: 500,
       error: "Internal Server Error",
-      message:
-        "The server encountered an unexpected error. Please try again later.",
+      message: "The server encountered an unexpected error. Please try again later.",
     });
   }
+  
   return response;
 };

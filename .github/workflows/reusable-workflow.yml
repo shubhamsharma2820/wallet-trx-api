@@ -34,11 +34,9 @@ jobs:
       with:
         args: -c "
           serverless plugin install --name serverless-deployment-bucket &&
-          serverless plugin install --name serverless-iam-roles-per-function &&
-          serverless plugin install --name serverless-domain-manager &&
           serverless plugin install --name serverless-associate-waf &&
-          serverless plugin install --name serverless-step-functions &&
-          npm install file-type &&
+          serverless plugin install --name serverless-domain-manager &&
+          serverless plugin install --name serverless-iam-roles-per-function &&
           serverless deploy --stage ${{ inputs.stage }} --region ${{ matrix.region }}"
         entrypoint: /bin/sh
       env:

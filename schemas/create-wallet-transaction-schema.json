@@ -1,0 +1,13 @@
+{
+    "title": "Create Wallet Transaction Schema",
+    "type": "object",
+    "properties": {
+      "userId": { "type": "string" },
+      "referenceId": { "type": "string" },
+      "description":{"type":"string"},
+      "isCredited":{"type":"string"},
+      "amount":{"type": "integer"}
+    },
+    "required": ["userId", "referenceId","description","isCredited","amount"]
+  }
+  

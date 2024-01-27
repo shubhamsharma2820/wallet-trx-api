@@ -1,5 +1,5 @@
 service: wallet-coin-api
-frameworkVersion: '3'
+frameworkVersion: "3"
 
 plugins:
   - serverless-deployment-bucket
@@ -22,7 +22,7 @@ custom:
   #   createRoute53Record: false
   associateWaf:
     name: spark-resources-ACL
-    version: V2  
+    version: V2
 
 provider:
   name: aws
@@ -34,7 +34,7 @@ provider:
   stackTags:
     project: ${self:custom.project}
   memorySize: 128
-  timeout: 90
+  timeout: 30
   logs:
     frameworkLambda: true
     restApi: true
@@ -51,6 +51,9 @@ resources:
       Properties:
         Name: ${self:service}
         Description: Create and Get wallet and coin transactions.
+        EndpointConfiguration:
+          Types:
+            - REGIONAL
 
     # UserPoolAuthorizer:
     #   Type: AWS::ApiGateway::Authorizer
@@ -61,28 +64,34 @@ resources:
     #       - !ImportValue UserPoolArn
     #     # The lenght of time(in seconds) that the authorizer results should be cached
     #     AuthorizerResultTtlInSeconds: 180
-    #     RestApiId: 
+    #     RestApiId:
     #       Ref: ApiGatewayRestApi
     #     IdentitySource: method.request.header.Authorization
 
 functions:
   create-wallet-transaction:
     handler: functions/wallet/create-wallet-transaction.createWalletTransaction
-    name: ${self:service}-wallet-transaction
+    name: ${self:service}-create-wallet-transaction
     description: Wallet transaction created in wallet Table.
     timeout: 30 #seconds
     memorySize: 128 #mb
     events:
       - http:
-          path: 'wallet'
+          path: "wallet"
           method: POST
+          request:
+            schemas:
+              application/json:
+                schema: ${file(./schemas/create-wallet-transaction-schema.json)}
+                name: createWalletTransactionSchema
+                description: "Validate schema for creating wallet transaction"
           # authorizer:
           #   type: COGNITO_USER_POOLS
           #   authorizerId:
-          #     Ref: UserPoolAuthorizer          
-    iamRoleStatementsName: ${self:service}-walletTransaction-lambda-role
+          #     Ref: UserPoolAuthorizer
+    iamRoleStatementsName: ${self:service}-createWalletTransaction-lambda-role
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: "Allow"
         Action:
           - dynamodb:PutItem
         Resource: !ImportValue WalletTransactionArn
@@ -91,28 +100,35 @@ functions:
     package:
       individually: true
       patterns:
-        - '!functions/**'
-        - '!node_modules'
-        - '!node_modules/@aws-sdk' 
-        - 'functions/wallet/create-wallet-transaction.mjs'
+        - "!functions/**"
+        - "!node_modules"
+        - "!node_modules/@aws-sdk"
+        - "functions/wallet/create-wallet-transaction.mjs"
+        - "schemas/create-wallet-transaction-schema.json"
 
   get-wallet-transaction:
     handler: functions/wallet/get-wallet-transactions.getWalletTransactions
-    name: ${self:service}-userall-wallet-transaction
-    description: user all Wallet transaction in wallet Table.
+    name: ${self:service}-user-all-wallet-transaction
+    description: Get all wallet transaction of the user.
     timeout: 30 #seconds
     memorySize: 128 #mb
     events:
       - http:
-          path: 'userwallettransaction/{userId}'
+          path: "wallet/{userId}"
           method: POST
+          request:
+            schemas:
+              application/json:
+                schema: ${file(./schemas/get-wallet-transaction-schema.json)}
+                name: getuserwalletTransactionschema
+                description: "Validate schema to get all wallet transaction"
           # authorizer:
           #   type: COGNITO_USER_POOLS
           #   authorizerId:
-          #     Ref: UserPoolAuthorizer          
+          #     Ref: UserPoolAuthorizer
     iamRoleStatementsName: ${self:service}-userwalletTransaction-lambda-role
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: "Allow"
         Action:
           - dynamodb:Query
         Resource: !ImportValue WalletTransactionArn
@@ -121,28 +137,35 @@ functions:
     package:
       individually: true
       patterns:
-        - '!functions/**'
-        - '!node_modules'
-        - '!node_modules/@aws-sdk' 
-        - 'functions/wallet/get-wallet-transactions.mjs'
+        - "!functions/**"
+        - "!node_modules"
+        - "!node_modules/@aws-sdk"
+        - "functions/wallet/get-wallet-transactions.mjs"
+        - "schemas/get-wallet-transaction-schema.json"
 
-  get-bor-transaction:
-    handler: functions/wallet/get-bor-transaction.getBorBaesdWalletTransaction
-    name: ${self:service}-user-all-bor-wallet-transaction
-    description: user all bor based Wallet transaction in wallet Table.
+  get-user-filtered-wallet-transactions:
+    handler: functions/get-user-filtered-wallet-transactions.getUserFilteredWalletTransactions
+    name: ${self:service}-get-user-filtered-wallet-transactions
+    description: Get user wallet transactions base on reference like gold, cashback etc….
     timeout: 30 #seconds
     memorySize: 128 #mb
     events:
       - http:
-          path: 'borwallettransaction/{userId}'   #bor = based on referenceId
+          path: "filter-wallet/{userId}"
           method: POST
+          request:
+            schemas:
+              application/json:
+                schema: ${file(./schemas/get-user-filtered-wallet-schema.json)}
+                name: getUserFilteredWalletTransactionsschema
+                description: "Validate schema to get user filtered wallet transaction"
           # authorizer:
           #   type: COGNITO_USER_POOLS
           #   authorizerId:
-          #     Ref: UserPoolAuthorizer          
-    iamRoleStatementsName: ${self:service}-userBORwalletTransaction-lambda-role
+          #     Ref: UserPoolAuthorizer
+    iamRoleStatementsName: ${self:service}-getUserFilteredWalletTransactions-lambda-role
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: "Allow"
         Action:
           - dynamodb:Query
         Resource: !ImportValue WalletTransactionArn
@@ -151,28 +174,35 @@ functions:
     package:
       individually: true
       patterns:
-        - '!functions/**'
-        - '!node_modules'
-        - '!node_modules/@aws-sdk' 
-        - 'functions/wallet/get-bor-transaction.mjs'
+        - "!functions/**"
+        - "!node_modules"
+        - "!node_modules/@aws-sdk"
+        - "functions/wallet/get-user-filtered-wallet-transactions.mjs"
+        - "schemas/get-user-filtered-wallet-schema.json"
 
-  get-all-walletbor-transaction:
-    handler: functions/wallet/get-reference-based-transaction.getBorBaesdAllWalletTransaction
-    name: ${self:service}-all-bor-based-wallet-transaction
-    description: all bor based Wallet transaction in wallet Table.
+  get-all-filtered-wallet-transaction:
+    handler: functions/wallet/get-all-filtered-wallet-transaction.getAllFilteredWalletTransactions
+    name: ${self:service}-get-all-filtered-wallet-transaction
+    description: Get all wallet transactions based on reference type like gold, cashback etc…
     timeout: 30 #seconds
     memorySize: 128 #mb
     events:
       - http:
-          path: 'allborwallettransaction'   #bor = based on referenceId
+          path: "filter-wallet"
           method: POST
+          request:
+            schemas:
+              application/json:
+                schema: ${file(./schemas/get-all-filtered-wallet-transaction-schema.json)}
+                name: getAllFilteredWalletTransactionsschemas
+                description: "Validate schema to get all filtered wallet transaction"
           # authorizer:
           #   type: COGNITO_USER_POOLS
           #   authorizerId:
-          #     Ref: UserPoolAuthorizer          
-    iamRoleStatementsName: ${self:service}-allBORwalletTransaction-lambda-role
+          #     Ref: UserPoolAuthorizer
+    iamRoleStatementsName: ${self:service}-getAllFilteredWalletTransactions-lambda-role
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: "Allow"
         Action:
           - dynamodb:Scan
         Resource: !ImportValue WalletTransactionArn
@@ -181,28 +211,35 @@ functions:
     package:
       individually: true
       patterns:
-        - '!functions/**'
-        - '!node_modules'
-        - '!node_modules/@aws-sdk' 
-        - 'functions/wallet/get-reference-based-transaction.mjs'
+        - "!functions/**"
+        - "!node_modules"
+        - "!node_modules/@aws-sdk"
+        - "functions/wallet/get-reference-based-transaction.mjs"
+        - "schemas/get-all-filtered-wallet-transaction-schema.json"
 
   create-coin-transaction:
     handler: functions/coin/create-coin-transaction.createCoinTransaction
-    name: ${self:service}-coin-transaction
-    description: coin transaction created in coin Table.
+    name: ${self:service}-create-coin-transaction
+    description: Coin transaction created in coin Table
     timeout: 30 #seconds
     memorySize: 128 #mb
     events:
       - http:
-          path: 'coin'
+          path: "coin"
           method: POST
+          request:
+            schemas:
+              application/json:
+                schema: ${file(./schemas/create-coin-transaction-schema.json)}
+                name: createCoinTransactionSchema
+                description: "Validate schema for creating coin transaction"
           # authorizer:
           #   type: COGNITO_USER_POOLS
           #   authorizerId:
-          #     Ref: UserPoolAuthorizer          
-    iamRoleStatementsName: ${self:service}-coinTransaction-lambda-role
+          #     Ref: UserPoolAuthorizer
+    iamRoleStatementsName: ${self:service}-createcoinTransaction-lambda-role
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: "Allow"
         Action:
           - dynamodb:PutItem
         Resource: !ImportValue CoinTransactionTableArn
@@ -211,28 +248,35 @@ functions:
     package:
       individually: true
       patterns:
-        - '!functions/**'
-        - '!node_modules'
-        - '!node_modules/@aws-sdk' 
-        - 'functions/coin/create-coin-transaction.mjs'
+        - "!functions/**"
+        - "!node_modules"
+        - "!node_modules/@aws-sdk"
+        - "functions/coin/create-coin-transaction.mjs"
+        - 'schemas/create-coin-transaction-schema.json'
 
   get-coin-transaction:
     handler: functions/coin/get-coin-transactions.getCoinTransactions
     name: ${self:service}-user-all-coin-transaction
-    description: user all coin transaction in coin Table.
+    description: Get all coin transaction of the user.
     timeout: 30 #seconds
     memorySize: 128 #mb
     events:
       - http:
-          path: 'usercointransaction/{userId}'
+          path: "coin/{userId}"
           method: POST
+          request:
+            schemas:
+              application/json:
+                schema: ${file(./schemas/get-coin-transaction-schema.json)}
+                name: getUserCoinTransactionSchema
+                description: "Validate schema for creating wallet transaction"
           # authorizer:
           #   type: COGNITO_USER_POOLS
           #   authorizerId:
-          #     Ref: UserPoolAuthorizer          
-    iamRoleStatementsName: ${self:service}-usercoinTransaction-lambda-role
+          #     Ref: UserPoolAuthorizer
+    iamRoleStatementsName: ${self:service}-userAllCoinTransaction-lambda-role
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: "Allow"
         Action:
           - dynamodb:Query
         Resource: !ImportValue CoinTransactionTableArn
@@ -241,28 +285,35 @@ functions:
     package:
       individually: true
       patterns:
-        - '!functions/**'
-        - '!node_modules'
-        - '!node_modules/@aws-sdk' 
-        - 'functions/coin/get-coin-transactions.mjs'
+        - "!functions/**"
+        - "!node_modules"
+        - "!node_modules/@aws-sdk"
+        - "functions/coin/get-coin-transactions.mjs"
+        - 'schemas/get-coin-transaction-schema.json'
 
-  get-bor-coin-transaction:
-    handler: functions/coin/get-bor-coin-transaction.getBorBaesdcoinTransaction
-    name: ${self:service}-user-all-bor-coin-transaction
-    description: user all bor based coin transaction in coin Table.
+  get-user-filtered-coin-transaction:
+    handler: functions/coin/get-user-filtered-coin-transaction.getUserFilteredCoinTransactions
+    name: ${self:service}-get-user-filtered-coin-transaction
+    description: Get user coin transactions base on reference like gold, cashback etc….
     timeout: 30 #seconds
     memorySize: 128 #mb
     events:
       - http:
-          path: 'borcointransaction/{userId}'   #bor = based on referenceId
+          path: "filter-coin/{userId}" 
           method: POST
+          request:
+            schemas:
+              application/json:
+                schema: ${file(./schemas/get-user-filtered-coin-schema.json)}
+                name: getUserFilteredCoinTransactionsSchema
+                description: "Validate schema to get user filtered coin transaction."
           # authorizer:
           #   type: COGNITO_USER_POOLS
           #   authorizerId:
-          #     Ref: UserPoolAuthorizer          
-    iamRoleStatementsName: ${self:service}-userBORcoinTransaction-lambda-role
+          #     Ref: UserPoolAuthorizer
+    iamRoleStatementsName: ${self:service}-getUserFilteredCoinTransactions-lambda-role
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: "Allow"
         Action:
           - dynamodb:Query
         Resource: !ImportValue CoinTransactionTableArn
@@ -271,28 +322,35 @@ functions:
     package:
       individually: true
       patterns:
-        - '!functions/**'
-        - '!node_modules'
-        - '!node_modules/@aws-sdk' 
-        - 'functions/coin/get-bor-coin-transaction.mjs'
+        - "!functions/**"
+        - "!node_modules"
+        - "!node_modules/@aws-sdk"
+        - "functions/coin/get-user-filtered-coin-transaction.mjs"
+        - 'schemas/get-user-filtered-coin-schema.json'
 
-  get-all-cointbor-transaction:
-    handler: functions/coin/get-referenceId-based-coin-transaction.getBorBaesdAllCoinTransaction
-    name: ${self:service}-all-bor-based-coin-transaction
-    description: all bor based Coin transaction in coin Table.
+  get-all-filtered-coin-transaction:
+    handler: functions/coin/get-all-filtered-coin-transaction.getAllFilteredCoinTransactions
+    name: ${self:service}-get-all-filtered-coin-transaction
+    description: Get all coin transactions based on reference type like gold, cashback etc….
     timeout: 30 #seconds
     memorySize: 128 #mb
     events:
       - http:
-          path: 'allbor-coin-transaction'   #bor = based on referenceId
+          path: "filter-coin"
           method: POST
+          request:
+            schemas:
+              application/json:
+                schema: ${file(./schemas/get-user-filtered-coin-transaction-schema.json)}
+                name: getAllFilteredCoinTransactionsSchema
+                description: "Validate schema to get all filtered coin transaction."
           # authorizer:
           #   type: COGNITO_USER_POOLS
           #   authorizerId:
-          #     Ref: UserPoolAuthorizer          
-    iamRoleStatementsName: ${self:service}-allBORcoinTransaction-lambda-role
+          #     Ref: UserPoolAuthorizer
+    iamRoleStatementsName: ${self:service}-getAllFilteredCoinTransactions-lambda-role
     iamRoleStatements:
-      - Effect: 'Allow'
+      - Effect: "Allow"
         Action:
           - dynamodb:Scan
         Resource: !ImportValue CoinTransactionTableArn
@@ -301,17 +359,17 @@ functions:
     package:
       individually: true
       patterns:
-        - '!functions/**'
-        - '!node_modules'
-        - '!node_modules/@aws-sdk' 
-        - 'functions/coin/get-referenceId-based-coin-transaction.mjs'
-
+        - "!functions/**"
+        - "!node_modules"
+        - "!node_modules/@aws-sdk"
+        - "functions/coin/get-all-filtered-coin-transaction.mjs"
+        - 'schemas/get-user-filtered-coin-transaction-schema.json'
 
 package:
   individually: true
   patterns:
-    - '!package-lock.json'
-    - '!README.md'
-    - '!.gitignore'
-    - '!yml'
-    - '!.*/**'
+    - "!package-lock.json"
+    - "!README.md"
+    - "!.gitignore"
+    - "!yml"
+    - "!.*/**"

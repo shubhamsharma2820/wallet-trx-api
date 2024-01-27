@@ -1,20 +1,19 @@
-// #bor = based on referenceId
+
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 
-export const getBorBaesdWalletTransaction = async (event) => {
+export const getUserFilteredCoinTransactions = async (event) => {
   console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
   const response = { statusCode: 200, body: "" };
-//   #bor = based on referenceId
   try {
     const data = JSON.parse(event.body);
     const { exclusiveStartKey, sortKeyPrefix } = data;
     const userId = event.pathParameters.userId;
-    const walletTable = process.env.WALLET_TRANSACTION_TABLE;
+    const coinTable = process.env.COIN_TRANSACTION_TABLE;
     const limit = 30;
 
     const params = {
-      TableName: walletTable,
+      TableName: coinTable,
       Limit: limit || 10,
       KeyConditionExpression: "userId = :u AND begins_with(referenceId, :r)",
       ExpressionAttributeValues: {

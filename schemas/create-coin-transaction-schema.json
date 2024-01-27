@@ -1,0 +1,13 @@
+{
+    "title": "Create Coin Transaction Schema",
+    "type": "object",
+    "properties": {
+      "userId": { "type": "string" },
+      "referenceId": { "type": "string" },
+      "description":{"type":"string"},
+      "isCredited":{"type":"string"},
+      "coin":{"type": "integer"}
+    },
+    "required": ["userId", "referenceId","description","isCredited","coin"]
+  }
+  

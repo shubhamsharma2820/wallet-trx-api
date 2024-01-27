@@ -1,0 +1,9 @@
+{
+    "title": "Get user's all coin transactions Schema",
+    "type": "object",
+    "properties": {
+      "exclusiveStartKey":  { "type": [ "null", "object"] }
+    },
+    "required": ["exclusiveStartKey"]
+  }
+  

@@ -1,0 +1,10 @@
+{
+    "title": "Get all wallet transactions base on reference like gold, cashback etc… Schema",
+    "type": "object",
+    "properties": {
+      "exclusiveStartKey":  { "type": [ "null", "object"] },
+      "sortKeyPrefix": {"type": "string"}
+    },
+    "required": ["exclusiveStartKey", "sortKeyPrefix"]
+  }
+  

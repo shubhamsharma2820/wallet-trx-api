@@ -3,18 +3,18 @@
 import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 
-export const getBorBaesdAllWalletTransaction = async (event) => {
+export const getAllFilteredCoinTransactions = async (event) => {
   console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
   const response = { statusCode: 200, body: "" };
 
   try {
     const data = JSON.parse(event.body);
     const { exclusiveStartKey, sortKeyPrefix } = data;
-    const walletTable = process.env.WALLET_TRANSACTION_TABLE;
+    const coinTable = process.env.COIN_TRANSACTION_TABLE;
     const limit = 30;
 
     const params = {
-      TableName: walletTable,
+      TableName: coinTable,
       Limit: limit || 10,
       FilterExpression: "begins_with(referenceId, :r)",
       ExpressionAttributeValues: {
@@ -31,7 +31,7 @@ export const getBorBaesdAllWalletTransaction = async (event) => {
     response.body = JSON.stringify({
       status: 200,
       data: result.Items,
-      message: "All referenceId-based wallet transactions...",
+      message: "All referenceId-based coin transactions...",
       lastEvaluatedKey: result.LastEvaluatedKey || null,
     });
   } catch (error) {

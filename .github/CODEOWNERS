@@ -1,0 +1,5 @@
+# Default reviewers for all pull requests
+* @Yogesh-Bhati
+
+# Github configs PR reviewer
+.github/*   @Yogesh-Bhati

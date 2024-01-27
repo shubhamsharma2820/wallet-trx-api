@@ -1,37 +1,43 @@
-// #bor = based on referenceId
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
+
+const walletTable = process.env.WALLET_TRANSACTION_TABLE;
+const limit = 30;
 
 export const getUserFilteredWalletTransactions = async (event) => {
   console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
   const response = { statusCode: 200, body: "" };
-  //   #bor = based on referenceId
   try {
-    const data = JSON.parse(event.body);
-    const { exclusiveStartKey, sortKeyPrefix } = data;
+    const { exclusiveStartKey = null, sortKeyPrefix } = JSON.parse(event.body);
+    let ExclusiveStartKey;
+    if (exclusiveStartKey) {
+      ExclusiveStartKey = exclusiveStartKey || null;
+    }
     const userId = event.pathParameters.userId;
-    const walletTable = process.env.WALLET_TRANSACTION_TABLE;
-    const limit = 30;
 
+    //DynamoDB query parameters
     const params = {
       TableName: walletTable,
-      Limit: limit || 10,
-      KeyConditionExpression: "userId = :u AND begins_with(referenceId, :r)",
+      Limit: limit,
+      ExclusiveStartKey: ExclusiveStartKey,
+      KeyConditionExpression:
+        "userId = :userId AND begins_with(referenceId, :referenceId)",
       ExpressionAttributeValues: {
-        ":u": userId,
-        ":r": sortKeyPrefix,
+        ":userId": userId,
+        ":referenceId": sortKeyPrefix,
       },
     };
-    if (exclusiveStartKey) {
-      params.ExclusiveStartKey = exclusiveStartKey || null;
-    }
-    const Result = await ddbDocClient.send(new QueryCommand(params));
-    console.log(Result);
+
+    const { Items, LastEvaluatedKey } = await ddbDocClient.send(
+      new QueryCommand(params)
+    );
+    response.statusCode = 200;
     response.body = JSON.stringify({
       status: 200,
-      data: Result.Items,
-      message: "User's all wallet transactions...",
-      lastEvaluatedKey: Result.LastEvaluatedKey || null,
+      data: Items,
+      message:
+        "Wallet transactions retrieved successfully based on user filtered..!!!",
+      lastEvaluatedKey: LastEvaluatedKey || null,
     });
   } catch (error) {
     console.error("Error:", error);

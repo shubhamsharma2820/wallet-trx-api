@@ -1,38 +1,41 @@
-// #bor = based on referenceId
-// Admin side API
 import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 
-   const walletTable = process.env.WALLET_TRANSACTION_TABLE;
+const walletTable = process.env.WALLET_TRANSACTION_TABLE;
+const limit = 30;
 
 export const getAllFilteredWalletTransactions = async (event) => {
   console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
   const response = { statusCode: 200, body: "" };
 
   try {
-    const { exclusiveStartKey = null, sortKeyPrefix } = JSON.parse(event.body);
-    const limit = 30;
-
-    const params = {
-      TableName: walletTable,
-      Limit: limit || 10,
-      FilterExpression: "begins_with(referenceId, :r)",
-      ExpressionAttributeValues: {
-        ":r": sortKeyPrefix,
-      },
-    };
+    const { exclusiveStartKey , sortKeyPrefix } = JSON.parse(event.body);
+    let ExclusiveStartKey;
     if (exclusiveStartKey) {
-      params.ExclusiveStartKey = exclusiveStartKey || null;
+      ExclusiveStartKey = exclusiveStartKey || null;
     }
 
-    const data = await ddbDocClient.send(new ScanCommand(params));
-    console.log(result);
+    //DynamoDB query parameters
+    const params = {
+      TableName: walletTable,
+      Limit: limit,
+      ExclusiveStartKey: ExclusiveStartKey,
+      FilterExpression: "begins_with(referenceId, :referenceId)",
+      ExpressionAttributeValues: {
+        ":referenceId": sortKeyPrefix,
+      },
+    };
+
+    const { Items, LastEvaluatedKey } = await ddbDocClient.send(
+      new ScanCommand(params)
+    );
 
     response.body = JSON.stringify({
       status: 200,
-      data: result.Items,
-      message: "All referenceId-based wallet transactions...",
-      lastEvaluatedKey: result.LastEvaluatedKey || null,
+      data: Items,
+      message:
+        "All referenceId-based wallet transactions retrieved successfully!.",
+      lastEvaluatedKey: LastEvaluatedKey || null,
     });
   } catch (error) {
     console.error("Error:", error);

@@ -2,36 +2,40 @@
 import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 
+const coinTable = process.env.COIN_TRANSACTION_TABLE;
+const limit = 30;
+
 export const getCoinTransactions = async (event) => {
   console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
   const response = { statusCode: 200, body: "" };
 
   try {
-    const data = JSON.parse(event.body);
-    const { exclusiveStartKey } = data;
+    const { exclusiveStartKey } = JSON.parse(event.body);
+    let ExclusiveStartKey;
+    if (exclusiveStartKey) {
+      ExclusiveStartKey = exclusiveStartKey || null;
+    }
     const userId = event.pathParameters.userId;
-    const coinTable = process.env.COIN_TRANSACTION_TABLE;
-    const limit = 30;
+
+    //DynamoDB query parameters
     const params = {
       TableName: coinTable,
-      Limit: limit || 10,
+      Limit: limit,
+      ExclusiveStartKey: ExclusiveStartKey,
       KeyConditionExpression: "userId = :userId",
       ExpressionAttributeValues: {
         ":userId": userId,
       },
     };
 
-    if (exclusiveStartKey) {
-      params.ExclusiveStartKey = exclusiveStartKey || null;
-    }
-
-    const coinTransaction = await ddbDocClient.send(new QueryCommand(params));
-    console.log(coinTransaction);
+    const { Items, LastEvaluatedKey } = await ddbDocClient.send(
+      new QueryCommand(params)
+    );
     response.body = JSON.stringify({
       status: 200,
-      data: coinTransaction.Items,
-      message: "User's all coin transactions...",
-      lastEvaluatedKey: coinTransaction.LastEvaluatedKey || null,
+      data: Items,
+      message: "Coin transactions retrieved successfully!.",
+      lastEvaluatedKey: LastEvaluatedKey || null,
     });
   } catch (error) {
     console.error("Error:", error);
@@ -43,6 +47,5 @@ export const getCoinTransactions = async (event) => {
         "The server encountered an unexpected error. Please try again later.",
     });
   }
-
   return response;
 };

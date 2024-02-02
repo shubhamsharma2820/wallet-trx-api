@@ -5,7 +5,7 @@
       "userId": { "type": "string" },
       "referenceId": { "type": "string" },
       "description":{"type":"string"},
-      "isCredited":{"type":"string"},
+      "isCredited":{"type":"boolean"},
       "amount":{"type": "integer"}
     },
     "required": ["userId", "referenceId","description","isCredited","amount"]

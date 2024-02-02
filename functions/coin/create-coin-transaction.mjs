@@ -10,7 +10,7 @@ export const createCoinTransaction = async (event) => {
     const response = { statusCode: 200, body: "" };
 
     try {
-        const { userId, referenceId, description, isCredited, coin } = JSON.parse(event.body);
+        const { userId, referenceId, description, isCredited, amount } = JSON.parse(event.body);
 
         const params = {
             TableName: coinTable,
@@ -20,7 +20,7 @@ export const createCoinTransaction = async (event) => {
                 description: description,
                 isCredited: isCredited,
                 timeStamp: new Date(Date.now()).toISOString(),
-                coin: coin,
+                amount: amount,
             },
         };
 

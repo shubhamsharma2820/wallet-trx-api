@@ -62,7 +62,7 @@ resources:
         Type: COGNITO_USER_POOLS
         ProviderARNs:
           - !ImportValue UserPoolArn
-        The lenght of time(in seconds) that the authorizer results should be cached
+        # The lenght of time(in seconds) that the authorizer results should be cached
         AuthorizerResultTtlInSeconds: 180
         RestApiId:
           Ref: ApiGatewayRestApi

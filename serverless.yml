@@ -4,22 +4,22 @@ frameworkVersion: "3"
 plugins:
   - serverless-deployment-bucket
   - serverless-iam-roles-per-function
-  - serverless-domain-manager
-  - serverless-associate-waf
+  # - serverless-domain-manager
+  # - serverless-associate-waf
 
 custom:
   project: spark
   projectKey: SPK
   region: ap-south-1
-  domain:
-    dev: dev.withspark.club
-    test: test.withspark.club
-    prod: api.withspark.club
-  customDomain:
-    domainName: ${self:custom.domain.${opt:stage}}
-    basePath: 'wct'
-    stage: ${opt:stage}
-    createRoute53Record: false
+  # domain:
+  #   dev: dev.withspark.club
+  #   test: test.withspark.club
+  #   prod: api.withspark.club
+  # customDomain:
+  #   domainName: ${self:custom.domain.${opt:stage}}
+  #   basePath: 'wct'
+  #   stage: ${opt:stage}
+  #   createRoute53Record: false
   associateWaf:
     name: spark-resources-ACL
     version: V2
@@ -55,18 +55,18 @@ resources:
           Types:
             - REGIONAL
 
-    UserPoolAuthorizer:
-      Type: AWS::ApiGateway::Authorizer
-      Properties:
-        Name: jwt-authorizer-spark
-        Type: COGNITO_USER_POOLS
-        ProviderARNs:
-          - !ImportValue UserPoolArn
-        # The lenght of time(in seconds) that the authorizer results should be cached
-        AuthorizerResultTtlInSeconds: 180
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        IdentitySource: method.request.header.Authorization
+    # UserPoolAuthorizer:
+    #   Type: AWS::ApiGateway::Authorizer
+    #   Properties:
+    #     Name: jwt-authorizer-spark
+    #     Type: COGNITO_USER_POOLS
+    #     ProviderARNs:
+    #       - !ImportValue UserPoolArn
+    #     # The lenght of time(in seconds) that the authorizer results should be cached
+    #     AuthorizerResultTtlInSeconds: 180
+    #     RestApiId:
+    #       Ref: ApiGatewayRestApi
+    #     IdentitySource: method.request.header.Authorization
 
 functions:
   create-wallet-transaction:
@@ -85,10 +85,10 @@ functions:
                 schema: ${file(./schemas/wallet/create-wallet-transaction-schema.json)}
                 name: createWalletTransactionSchema
                 description: "Validate schema for creating wallet transaction"
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: UserPoolAuthorizer
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer
     iamRoleStatementsName: ${self:service}-createWalletTransaction-lambda-role
     iamRoleStatements:
       - Effect: "Allow"
@@ -122,10 +122,10 @@ functions:
                 schema: ${file(./schemas/wallet/get-wallet-transactions-schema.json)}
                 name: getuserwalletTransactionschema
                 description: "Validate schema to get all wallet transaction"
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: UserPoolAuthorizer
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer
     iamRoleStatementsName: ${self:service}-userwalletTransaction-lambda-role
     iamRoleStatements:
       - Effect: "Allow"
@@ -159,10 +159,10 @@ functions:
                 schema: ${file(./schemas/wallet/get-user-filtered-wallet-transactions-schema.json)}
                 name: getUserFilteredWalletTransactionsschema
                 description: "Validate schema to get user filtered wallet transaction"
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: UserPoolAuthorizer
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer
     iamRoleStatementsName: ${self:service}-getUserFilteredWalletTransactions-lambda-role
     iamRoleStatements:
       - Effect: "Allow"
@@ -196,10 +196,10 @@ functions:
                 schema: ${file(./schemas/wallet/get-all-filtered-wallet-transactions-schema.json)}
                 name: getAllFilteredWalletTransactionsschemas
                 description: "Validate schema to get all filtered wallet transaction"
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: UserPoolAuthorizer
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer
     iamRoleStatementsName: ${self:service}-getAllFilteredWalletTransactions-lambda-role
     iamRoleStatements:
       - Effect: "Allow"
@@ -233,10 +233,10 @@ functions:
                 schema: ${file(./schemas/coin/create-coin-transaction-schema.json)}
                 name: createCoinTransactionSchema
                 description: "Validate schema for creating coin transaction"
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: UserPoolAuthorizer
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer
     iamRoleStatementsName: ${self:service}-createcoinTransaction-lambda-role
     iamRoleStatements:
       - Effect: "Allow"
@@ -270,10 +270,10 @@ functions:
                 schema: ${file(./schemas/coin/get-coin-transactions-schema.json)}
                 name: getUserCoinTransactionSchema
                 description: "Validate schema for creating wallet transaction"
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: UserPoolAuthorizer
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer
     iamRoleStatementsName: ${self:service}-userAllCoinTransaction-lambda-role
     iamRoleStatements:
       - Effect: "Allow"
@@ -307,10 +307,10 @@ functions:
                 schema: ${file(./schemas/coin/get-user-filtered-coin-transactions-schema.json)}
                 name: getUserFilteredCoinTransactionsSchema
                 description: "Validate schema to get user filtered coin transaction."
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: UserPoolAuthorizer
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer
     iamRoleStatementsName: ${self:service}-getUserFilteredCoinTransactions-lambda-role
     iamRoleStatements:
       - Effect: "Allow"
@@ -344,10 +344,10 @@ functions:
                 schema: ${file(./schemas/coin/get-all-filtered-coin-transactions-schema.json)}
                 name: getAllFilteredCoinTransactionsSchema
                 description: "Validate schema to get all filtered coin transaction."
-          authorizer:
-            type: COGNITO_USER_POOLS
-            authorizerId:
-              Ref: UserPoolAuthorizer
+          # authorizer:
+          #   type: COGNITO_USER_POOLS
+          #   authorizerId:
+          #     Ref: UserPoolAuthorizer
     iamRoleStatementsName: ${self:service}-getAllFilteredCoinTransactions-lambda-role
     iamRoleStatements:
       - Effect: "Allow"

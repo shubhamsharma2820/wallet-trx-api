@@ -13,18 +13,21 @@ export const createCoinTransaction = async (event) => {
         const { userId, referenceId, description, isCredited, amount } = JSON.parse(event.body);
 
         const params = {
-            TableName: coinTable,
-            Item: {
-                userId: userId,
-                referenceId: referenceId,
-                description: description,
-                isCredited: isCredited,
-                timeStamp: new Date(Date.now()).toISOString(),
-                amount: amount,
-            },
+          TableName: coinTable,
+          Item: {
+            userId: userId,
+            referenceId: referenceId,
+            description: description,
+            isCredited: isCredited,
+            timeStamp: new Date(Date.now()).toLocaleString("en-IN", {
+              timeZone: "Asia/Kolkata",
+            }),
+            amount: amount,
+          },
         };
 
         const data = await ddbDocClient.send(new PutCommand(params));
+        response.statusCode = 200;
         response.body = JSON.stringify({
             status: 200,
             message: "Coin transaction created successfully...!",

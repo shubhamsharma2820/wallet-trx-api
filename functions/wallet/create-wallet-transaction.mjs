@@ -18,7 +18,9 @@ export const createWalletTransaction = async (event) => {
         referenceId: referenceId,
         description: description,
         isCredited: isCredited,
-        timeStamp: new Date(Date.now()).toISOString(),
+        timeStamp: new Date(Date.now()).toLocaleString("en-IN", {
+              timeZone: "Asia/Kolkata",
+            }),
         amount: amount,
       },
     };

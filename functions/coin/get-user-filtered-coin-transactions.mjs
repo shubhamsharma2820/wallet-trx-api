@@ -35,21 +35,17 @@ export const getUserFilteredCoinTransactions = async (event) => {
       Limit: limit > 10 ? limit : 10,
       ExclusiveStartKey: ExclusiveStartKey,
       KeyConditionExpression:
-        "userId = :userId AND begins_with(referenceId, :referenceId)",
+        "userId = :userId AND begins_with(txnType, :txnType)",
       ExpressionAttributeValues: {
         ":userId": userId,
-        ":referenceId": sortKeyPrefix,
+        ":txnType": sortKeyPrefix,
       },
     };
 
     const { Items, LastEvaluatedKey } = await ddbDocClient.send(
       new QueryCommand(params)
     );
-    Items.sort((a, b) => {
-      const timestampA = parseIndianStandardTime(a.timeStamp).getTime();
-      const timestampB = parseIndianStandardTime(b.timeStamp).getTime();
-      return timestampB - timestampA;
-    });
+
     response.body = JSON.stringify({
       status: 200,
       data: Items,
@@ -70,14 +66,3 @@ export const getUserFilteredCoinTransactions = async (event) => {
 
   return response;
 };
-function parseIndianStandardTime(timestamp) {
-  const [date, time] = timestamp.split(", ");
-  const [day, month, year] = date.split("/");
-  const [hour, minute, second, meridiem] = time.split(/:| /);
-
-  let hour24 = parseInt(hour, 10);
-  if (meridiem === "pm") {
-    hour24 += 12;
-  }
-  return new Date(Date.UTC(year, month - 1, day, hour24, minute, second));
-}

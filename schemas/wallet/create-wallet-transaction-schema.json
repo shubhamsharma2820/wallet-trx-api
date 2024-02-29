@@ -3,11 +3,12 @@
     "type": "object",
     "properties": {
       "userId": { "type": "string" },
-      "referenceId": { "type": "string" },
+      "txnType": { "type": "string" },
       "description":{"type":"string"},
       "isCredited":{"type":"boolean"},
-      "amount":{"type": "integer"}
+      "amount":{"type": "integer"},
+      "txnId":{"type":"string"}
     },
-    "required": ["userId", "referenceId","description","isCredited","amount"]
+    "required": ["userId", "txnType","description","isCredited","amount","txnId"]
   }
   

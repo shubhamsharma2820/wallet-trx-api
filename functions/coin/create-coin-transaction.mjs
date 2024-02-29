@@ -10,18 +10,20 @@ export const createCoinTransaction = async (event) => {
     const response = { statusCode: 200, body: "" };
 
     try {
-        const { userId, referenceId, description, isCredited, amount } = JSON.parse(event.body);
+        const { userId, txnType, description, isCredited, amount, txnId } =
+          JSON.parse(event.body);
 
         const params = {
           TableName: coinTable,
           Item: {
             userId: userId,
-            referenceId: referenceId,
+            txnType: txnType,
             description: description,
             isCredited: isCredited,
             timeStamp: new Date(Date.now()).toLocaleString("en-IN", {
               timeZone: "Asia/Kolkata",
             }),
+            txnId: txnId,
             amount: amount,
           },
         };

@@ -7,7 +7,6 @@ import { ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 
 const walletTable = process.env.WALLET_TRANSACTION_TABLE;
-const limit = 30;
 
 export const getAllFilteredWalletTransactions = async (event) => {
   console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
@@ -25,20 +24,16 @@ export const getAllFilteredWalletTransactions = async (event) => {
       TableName: walletTable,
       Limit: limit > 10 ? limit : 10,
       ExclusiveStartKey: ExclusiveStartKey,
-      FilterExpression: "begins_with(referenceId, :referenceId)",
+      FilterExpression: "begins_with(txnType, :txnType)",
       ExpressionAttributeValues: {
-        ":referenceId": sortKeyPrefix,
+        ":txnType": sortKeyPrefix,
       },
     };
 
     const { Items, LastEvaluatedKey } = await ddbDocClient.send(
       new ScanCommand(params)
     );
-    Items.sort((a, b) => {
-      const timestampA = parseIndianStandardTime(a.timeStamp).getTime();
-      const timestampB = parseIndianStandardTime(b.timeStamp).getTime();
-      return timestampB - timestampA;
-    });
+
     response.statusCode = 200;
     response.body = JSON.stringify({
       status: 200,
@@ -60,14 +55,4 @@ export const getAllFilteredWalletTransactions = async (event) => {
 
   return response;
 };
-function parseIndianStandardTime(timestamp) {
-  const [date, time] = timestamp.split(", ");
-  const [day, month, year] = date.split("/");
-  const [hour, minute, second, meridiem] = time.split(/:| /);
 
-  let hour24 = parseInt(hour, 10);
-  if (meridiem === "pm") {
-    hour24 += 12;
-  }
-  return new Date(Date.UTC(year, month - 1, day, hour24, minute, second));
-}

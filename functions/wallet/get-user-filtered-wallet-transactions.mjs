@@ -27,18 +27,17 @@ export const getUserFilteredWalletTransactions = async (event) => {
   }
   try {
     //DynamoDB query parameters
-    const params = {
-      TableName: walletTable,
-      Limit: limit > 10 ? limit : 10,
-      ExclusiveStartKey: ExclusiveStartKey,
-      KeyConditionExpression:
-        "userId = :userId AND begins_with(txnType, :txnType)",
-      ExpressionAttributeValues: {
-        ":userId": userId,
-        ":txnType": sortKeyPrefix,
-      },
-    };
-
+     const params = {
+       TableName: walletTable,
+       Limit: limit > 10 ? limit : 10,
+       ExclusiveStartKey: ExclusiveStartKey,
+       KeyConditionExpression: "userId = :userId",
+       ExpressionAttributeValues: {
+         ":userId": userId,
+         ":txnType": sortKeyPrefix,
+       },
+       FilterExpression: "begins_with(txnType, :txnType)",
+     };
     const { Items, LastEvaluatedKey } = await ddbDocClient.send(
       new QueryCommand(params)
     );

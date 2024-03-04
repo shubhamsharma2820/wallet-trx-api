@@ -7,7 +7,6 @@ import { QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { ddbDocClient } from "../../libs/ddbDocClient.mjs";
 
 const coinTable = process.env.COIN_TRANSACTION_TABLE;
-const limit = 30;
 
 export const getUserFilteredCoinTransactions = async (event) => {
   console.log("RECEIVED event: ", JSON.stringify(event, null, 2));
@@ -30,18 +29,17 @@ export const getUserFilteredCoinTransactions = async (event) => {
 
   try {
     //DynamoDB query parameters
-    const params = {
-      TableName: coinTable,
-      Limit: limit > 10 ? limit : 10,
-      ExclusiveStartKey: ExclusiveStartKey,
-      KeyConditionExpression:
-        "userId = :userId AND begins_with(txnType, :txnType)",
-      ExpressionAttributeValues: {
-        ":userId": userId,
-        ":txnType": sortKeyPrefix,
-      },
-    };
-
+     const params = {
+       TableName: coinTable,
+       Limit: limit > 10 ? limit : 10,
+       ExclusiveStartKey: ExclusiveStartKey,
+       KeyConditionExpression: "userId = :userId",
+       ExpressionAttributeValues: {
+         ":userId": userId,
+         ":txnType": sortKeyPrefix,
+       },
+       FilterExpression: "begins_with(txnType, :txnType)",
+     };
     const { Items, LastEvaluatedKey } = await ddbDocClient.send(
       new QueryCommand(params)
     );

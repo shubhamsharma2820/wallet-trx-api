@@ -16,13 +16,13 @@ export const createWalletTransaction = async (event) => {
       TableName: walletTable,
       Item: {
         userId: userId,
-        txnType: txnType,
+        txnId: txnId,
         description: description,
         isCredited: isCredited,
         timeStamp: new Date(Date.now()).toLocaleString("en-IN", {
           timeZone: "Asia/Kolkata",
         }),
-        txnId: txnId,
+        txnType: txnType,
         amount: amount,
       },
     };

@@ -10,7 +10,7 @@ export const createWalletTransaction = async (event) => {
   const response = { statusCode: 200, body: "" };
 
   try {
-    const { userId, txnType, description, isCredited, amount, txnId } =
+    const { userId, txnType, description, isCredited, amount, txnId, timeStamp } =
       JSON.parse(event.body);
     const params = {
       TableName: walletTable,
@@ -19,9 +19,7 @@ export const createWalletTransaction = async (event) => {
         txnId: txnId,
         description: description,
         isCredited: isCredited,
-        timeStamp: new Date(Date.now()).toLocaleString("en-IN", {
-          timeZone: "Asia/Kolkata",
-        }),
+        timeStamp: timeStamp,
         txnType: txnType,
         amount: amount,
       },

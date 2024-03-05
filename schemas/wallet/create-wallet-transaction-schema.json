@@ -7,8 +7,9 @@
       "description":{"type":"string"},
       "isCredited":{"type":"boolean"},
       "amount":{"type": "integer"},
-      "txnId":{"type":"string"}
+      "txnId":{"type":"string"},
+      "timeStamp":{"type": "string"}
     },
-    "required": ["userId", "txnType","description","isCredited","amount","txnId"]
+    "required": ["userId", "txnType", "description", "isCredited", "amount", "txnId", "timeStamp"]
   }
   

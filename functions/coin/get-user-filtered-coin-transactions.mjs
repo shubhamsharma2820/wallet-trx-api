@@ -39,6 +39,7 @@ export const getUserFilteredCoinTransactions = async (event) => {
          ":txnType": sortKeyPrefix,
        },
        FilterExpression: "begins_with(txnType, :txnType)",
+       ScanIndexForward: false,
      };
     const { Items, LastEvaluatedKey } = await ddbDocClient.send(
       new QueryCommand(params)

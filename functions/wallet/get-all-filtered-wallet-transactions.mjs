@@ -28,6 +28,7 @@ export const getAllFilteredWalletTransactions = async (event) => {
       ExpressionAttributeValues: {
         ":txnType": sortKeyPrefix,
       },
+      ScanIndexForward: false,
     };
 
     const { Items, LastEvaluatedKey } = await ddbDocClient.send(

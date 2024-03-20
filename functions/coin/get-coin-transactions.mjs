@@ -35,6 +35,7 @@ export const getCoinTransactions = async (event) => {
       },
       Limit: limit > 10 ? limit : 10,
       ExclusiveStartKey: ExclusiveStartKey,
+      ScanIndexForward: false,
     };
 
     const { Items, LastEvaluatedKey } = await ddbDocClient.send(

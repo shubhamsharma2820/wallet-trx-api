@@ -32,6 +32,7 @@ export const getWalletTransactions = async (event) => {
       ExpressionAttributeValues: {
         ":userId": userId,
       },
+      ScanIndexForward: false,
     };
 
     const { Items, LastEvaluatedKey } = await ddbDocClient.send(
